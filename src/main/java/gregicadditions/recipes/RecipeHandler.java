@@ -1,12 +1,13 @@
 package gregicadditions.recipes;
 
 import gregicadditions.GAConfig;
+import gregicadditions.GAMaterials;
 import gregicadditions.item.GAMetaItems;
+import gregicadditions.recipes.map.LargeRecipeBuilder;
 import gregtech.api.GTValues;
 import gregtech.api.recipes.CountableIngredient;
 import gregtech.api.recipes.ModHandler;
 import gregtech.api.recipes.RecipeMaps;
-import gregtech.api.recipes.builders.IntCircuitRecipeBuilder;
 import gregtech.api.recipes.ingredients.IntCircuitIngredient;
 import gregtech.api.unification.OreDictUnifier;
 import gregtech.api.unification.material.type.DustMaterial;
@@ -14,9 +15,7 @@ import gregtech.api.unification.material.type.FluidMaterial;
 import gregtech.api.unification.material.type.IngotMaterial;
 import gregtech.api.unification.material.type.Material;
 import gregtech.api.unification.ore.OrePrefix;
-import gregtech.api.unification.stack.MaterialStack;
 import gregtech.api.unification.stack.UnificationEntry;
-import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 import gregtech.common.items.behaviors.TurbineRotorBehavior;
 import net.minecraft.item.ItemStack;
@@ -24,10 +23,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static gregicadditions.GAMaterials.FermentationBase;
-import static gregicadditions.GAMaterials.GENERATE_METAL_CASING;
+import static gregicadditions.GAMaterials.*;
 import static gregicadditions.recipes.GAMachineRecipeRemoval.removeRecipesByInputs;
 import static gregicadditions.recipes.GARecipeMaps.CLUSTER_MILL_RECIPES;
 import static gregtech.api.GTValues.M;
@@ -35,7 +35,6 @@ import static gregtech.api.recipes.RecipeMaps.*;
 import static gregtech.api.unification.material.Materials.*;
 import static gregtech.api.unification.material.type.DustMaterial.MatFlags.NO_SMASHING;
 import static gregtech.api.unification.ore.OrePrefix.*;
-import static gregtech.api.unification.ore.OrePrefix.wireGtSingle;
 
 public class RecipeHandler {
 
@@ -64,6 +63,7 @@ public class RecipeHandler {
                 wirePrefix.addProcessingHandler(IngotMaterial.class, RecipeHandler::processWireGt);
             }
         }
+        OrePrefix.dust.addProcessingHandler(DustMaterial.class, RecipeHandler::processReplication);
     }
 
 
@@ -261,16 +261,36 @@ public class RecipeHandler {
 
     }
 
+    public static void processReplication(OrePrefix dustPrefix, DustMaterial material) {
+        if (material.hasFlag(DISABLE_REPLICATION)) {
+            return;
+        }
+        GARecipeMaps.REPLICATOR_RECIPES.recipeBuilder().duration((int) (material.getMass() * 100)).EUt(32)
+                .notConsumable(OreDictUnifier.get(dustPrefix, material))
+                .fluidInputs(GAMaterials.PositiveMatter.getFluid((int) material.getProtons()), GAMaterials.NeutralMatter.getFluid((int) material.getNeutrons()))
+                .outputs(OreDictUnifier.get(dustPrefix, material))
+                .buildAndRegister();
+        GARecipeMaps.MASS_FAB_RECIPES.recipeBuilder().duration((int) (material.getMass() * 100)).EUt(32)
+                .inputs(OreDictUnifier.get(dustPrefix, material))
+                .fluidOutputs(GAMaterials.PositiveMatter.getFluid((int) material.getProtons()), GAMaterials.NeutralMatter.getFluid((int) material.getNeutrons()))
+                .buildAndRegister();
+    }
+
     public static void registerLargeChemicalRecipes() {
-        RecipeMaps.CHEMICAL_RECIPES.getRecipeList().forEach(recipe ->
-                GARecipeMaps.LARGE_CHEMICAL_RECIPES.recipeBuilder()
-                        .EUt(recipe.getEUt())
-                        .duration(recipe.getDuration())
-                        .fluidInputs(recipe.getFluidInputs())
-                        .inputsIngredients(recipe.getInputs())
-                        .outputs(recipe.getOutputs())
-                        .fluidOutputs(recipe.getFluidOutputs())
-                        .buildAndRegister());
+        RecipeMaps.CHEMICAL_RECIPES.getRecipeList().forEach(recipe -> {
+            LargeRecipeBuilder largeRecipeMap = GARecipeMaps.LARGE_CHEMICAL_RECIPES.recipeBuilder()
+                    .EUt(recipe.getEUt())
+                    .duration(recipe.getDuration())
+                    .fluidInputs(recipe.getFluidInputs())
+                    .inputsIngredients(recipe.getInputs())
+                    .outputs(recipe.getOutputs())
+                    .fluidOutputs(recipe.getFluidOutputs());
+
+            recipe.getChancedOutputs().forEach(chanceEntry -> {
+                largeRecipeMap.chancedOutput(chanceEntry.getItemStack(), chanceEntry.getChance(), chanceEntry.getBoostPerTier());
+            });
+            largeRecipeMap.buildAndRegister();
+        });
     }
 
     public static void registerLargeMixerRecipes() {

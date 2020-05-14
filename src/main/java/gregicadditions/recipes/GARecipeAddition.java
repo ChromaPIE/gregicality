@@ -941,7 +941,7 @@ public class GARecipeAddition {
         //Rocket fuel tier 2
         MIXER_RECIPES.recipeBuilder().duration(16).EUt(240).fluidInputs(Hydrazine.getFluid(40), Methanol.getFluid(60)).fluidOutputs(DenseHydrazineFuelMixture.getFluid(100)).buildAndRegister();
         //rocket fuel tier 1
-        MIXER_RECIPES.recipeBuilder().duration(16).EUt(240).fluidInputs(LiquidOxygen.getFluid(1000), RP1.getFluid(5)).fluidOutputs(RP1RocketFuel.getFluid(5)).buildAndRegister();
+        MIXER_RECIPES.recipeBuilder().duration(16).EUt(240).fluidInputs(LiquidOxygen.getFluid(100), RP1.getFluid(25)).fluidOutputs(RP1RocketFuel.getFluid(25)).buildAndRegister();
 
         //Rocket fuel chemical
         CHEMICAL_RECIPES.recipeBuilder().duration(320).EUt(30).fluidInputs(Ammonia.getFluid(1000), HydrogenPeroxide.getFluid(1000)).fluidOutputs(Hydrazine.getFluid(1000), Water.getFluid(100)).buildAndRegister();
@@ -962,7 +962,7 @@ public class GARecipeAddition {
 
         DISTILLATION_RECIPES.recipeBuilder().duration(900).EUt(60).fluidInputs(CoalTar.getFluid(1000)).fluidOutputs(CoalTarOil.getFluid(500), Kerosene.getFluid(200), EthylBenzene.getFluid(150), Naphtha.getFluid(100), Anthracene.getFluid(50)).buildAndRegister();
 
-        DISTILLERY_RECIPES.recipeBuilder().duration(16).EUt(120).notConsumable(new IntCircuitIngredient(0)).fluidInputs(Kerosene.getFluid(4)).fluidOutputs(RP1.getFluid(2)).buildAndRegister();
+        DISTILLERY_RECIPES.recipeBuilder().duration(16).EUt(120).notConsumable(new IntCircuitIngredient(0)).fluidInputs(Kerosene.getFluid(50)).fluidOutputs(RP1.getFluid(25)).buildAndRegister();
         DISTILLERY_RECIPES.recipeBuilder().duration(25).EUt(30).notConsumable(new IntCircuitIngredient(0)).fluidInputs(SulfuricCoalTarOil.getFluid(20)).fluidOutputs(Naphtalene.getFluid(20)).buildAndRegister();
 
         CHEMICAL_RECIPES.recipeBuilder().duration(320).EUt(30).fluidInputs(SulfuricAcid.getFluid(8000), CoalTarOil.getFluid(8000)).fluidOutputs(SulfuricCoalTarOil.getFluid(16000)).buildAndRegister();
@@ -1411,6 +1411,7 @@ public class GARecipeAddition {
                 .buildAndRegister();
 
         LARGE_CHEMICAL_RECIPES.recipeBuilder()
+                .notConsumable(new IntCircuitIngredient(0))
                 .fluidInputs(PalladiumAmmonia.getFluid(1000))
                 .input(dust, PalladiumMetallicPowder)
                 .outputs(OreDictUnifier.get(dustTiny, PalladiumSalt, 12))
@@ -1578,8 +1579,8 @@ public class GARecipeAddition {
         //Osmium
         ValidationResult<Recipe> result = DISTILLATION_RECIPES.recipeBuilder()
                 .fluidInputs(AcidicOsmiumSolution.getFluid(1000))
-                .fluidOutputs(OsmiumSolution.getFluid(100))
-                .fluidOutputs(Water.getFluid(900))
+                .fluidOutputs(OsmiumSolution.getFluid(500))
+                .fluidOutputs(Water.getFluid(500))
                 .EUt(7680)
                 .duration(150).build();
         DISTILLATION_RECIPES.addRecipe(result);
